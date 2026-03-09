@@ -7,15 +7,14 @@ from langchain_pinecone import PineconeVectorStore
 from langchain_huggingface import ChatHuggingFace, HuggingFaceEndpoint
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 from langchain.tools import tool
-from langgraph.prebuilt import create_react_agent  # ✅ Correct import
+from langgraph.prebuilt import create_react_agent 
 
 load_dotenv()
 
-# ✅ Initialize Pinecone and vector store BEFORE the tool uses it
 pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
 embedding_model=HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 vector_store = PineconeVectorStore(
-    index=pc.Index(os.getenv("PINECONE_INDEX_NAME")),  # Replace with your index name
+    index=pc.Index(os.getenv("PINECONE_INDEX_NAME")),  
     embedding=embedding_model,
 )
 
@@ -38,12 +37,12 @@ def retrieve_context(query: str):
 
 tools = [retrieve_context]
 
-# ✅ system_prompt is passed directly to create_react_agent
+
 prompt = (
     "You have access to a tool that retrieves context from a blog post. "
     "Use the tool to help answer user queries."
 )
-agent = create_react_agent(model, tools, prompt=prompt)  # ✅ Correct function + args
+agent = create_react_agent(model, tools, prompt=prompt) 
 
 query = (
     "When is SRIJAN?\n\n"
