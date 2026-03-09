@@ -1,3 +1,10 @@
+import subprocess
+import sys
+
+# Remove deprecated pinecone plugin on Streamlit Cloud
+subprocess.run([sys.executable, "-m", "pip", "uninstall", "-y", "pinecone-plugin-inference"],
+               capture_output=True, check=False)
+
 import streamlit as st
 from pinecone import Pinecone
 from langchain_huggingface import HuggingFaceEmbeddings, HuggingFaceEndpoint
