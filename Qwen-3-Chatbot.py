@@ -29,8 +29,8 @@ def init_agent():
     """Initialize the RAG agent with Qwen3 model."""
     try:
         # 1. Initialize Pinecone
-        pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
-        index_name = os.getenv("PINECONE_INDEX_NAME")
+        pc = Pinecone(api_key=st.secrets["PINECONE_API_KEY"])
+        index_name = st.secrets["PINECONE_INDEX_NAME"]
         
         if not index_name:
             st.error("PINECONE_INDEX_NAME not found in environment variables!")
@@ -58,7 +58,7 @@ def init_agent():
             temperature=0.7,
             top_p=0.95,
             repetition_penalty=1.1,
-            huggingfacehub_api_token=os.getenv("HUGGINGFACEHUB_API_TOKEN"),
+            huggingfacehub_api_token=st.secrets["HUGGINGFACEHUB_API_TOKEN"],
         )
         
         # 5. Wrap as Chat Model for LangGraph

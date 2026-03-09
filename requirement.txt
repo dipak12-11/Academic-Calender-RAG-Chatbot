@@ -1,0 +1,10 @@
+streamlit
+python-dotenv
+pinecone
+langchain
+langchain-huggingface
+langchain-pinecone
+langchain-core
+langgraph
+sentence-transformers
+huggingface-hub
