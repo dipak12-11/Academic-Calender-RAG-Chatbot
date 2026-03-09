@@ -8,6 +8,9 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_pinecone import PineconeVectorStore
 from pinecone import Pinecone, ServerlessSpec
 import os
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
+
+
 url = "https://people.iitism.ac.in/~academics/assets/academic_files/AC%202025-26%20V12.pdf"
 def load_pdf_from_url(url: str):
     """
@@ -34,7 +37,8 @@ def load_pdf_from_url(url: str):
     print(f"Loaded {len(docs)} documents from the PDF.")
     print(f"Split into {len(final_chunks)} chunks.")
     
-    embedding_model=HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+    embedding_model=HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")# dim 384
+    # embedding_model2= GoogleGenerativeAIEmbeddings(model="models/gemini-embedding-001")#dim 3072
     pc=Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
     index_name=os.getenv("PINECONE_INDEX_NAME")
     if index_name not in pc.list_indexes().names():

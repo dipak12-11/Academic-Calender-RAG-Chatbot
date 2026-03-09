@@ -1,17 +1,15 @@
-import subprocess
-import sys
-
-# Remove deprecated pinecone plugin on Streamlit Cloud
-subprocess.run([sys.executable, "-m", "pip", "uninstall", "-y", "pinecone-plugin-inference"],
-               capture_output=True, check=False)
-
 import streamlit as st
 from pinecone import Pinecone
 from langchain_huggingface import HuggingFaceEmbeddings, HuggingFaceEndpoint
 from langchain_pinecone import PineconeVectorStore
+from dotenv import load_dotenv
+import os
+load_dotenv()
 from langchain.tools import tool
 from langgraph.prebuilt import create_react_agent
 from langchain_core.messages import HumanMessage, AIMessage
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
+
 
 
 
@@ -33,8 +31,8 @@ def init_agent():
     """Initialize the RAG agent with Qwen3 model."""
     try:
         # 1. Initialize Pinecone
-        pc = Pinecone(api_key=st.secrets["PINECONE_API_KEY"])
-        index_name = st.secrets["PINECONE_INDEX_NAME"]
+        pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
+        index_name = os.getenv("PINECONE_INDEX_NAME")
         
         if not index_name:
             st.error("PINECONE_INDEX_NAME not found in environment variables!")
@@ -48,6 +46,7 @@ def init_agent():
             model_kwargs={"device": "cpu"},
             encode_kwargs={"normalize_embeddings": True}
         )
+        # embedding_model2= GoogleGenerativeAIEmbeddings(model="models/gemini-embedding-001")#dim 3072
         
         # 3. Initialize Vector Store
         vector_store = PineconeVectorStore(
@@ -57,12 +56,11 @@ def init_agent():
         
         # 4. Initialize Qwen3 LLM via Hugging Face Endpoint
         llm = HuggingFaceEndpoint(
-            repo_id="Qwen/Qwen3-14B",  # ✅ Changed to Qwen3
-            max_new_tokens=512,
-            temperature=0.7,
+            repo_id="Qwen/Qwen3-14B",  
+            temperature=0,
             top_p=0.95,
             repetition_penalty=1.1,
-            huggingfacehub_api_token=st.secrets["HUGGINGFACEHUB_API_TOKEN"],
+            huggingfacehub_api_token=os.getenv("HUGGINGFACEHUB_API_TOKEN"),
         )
         
         # 5. Wrap as Chat Model for LangGraph
@@ -145,8 +143,15 @@ if question := st.chat_input("Ask a question about the Academic Calendar..."):
                     full_response = ""
                     tool_calls_shown = False
                     
+                    history=[]
+                    for m in st.session_state.messages:
+                        if m["role"]=="user":
+                            history.append(HumanMessage(content=m["content"]))
+                        else:
+                            history.append(AIMessage(content=m["content"]))
+                    
                     for event in agent.stream(
-                        {"messages": [HumanMessage(content=question)]},
+                        {"messages": history},
                         stream_mode="values",
                     ):
                         # Check for messages in the event

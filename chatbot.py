@@ -39,7 +39,7 @@ tools = [retrieve_context]
 
 
 prompt = (
-    "You have access to a tool that retrieves context from a blog post. "
+    "You have access to a tool that retrieves context from an Academic Calendar. "
     "Use the tool to help answer user queries."
 )
 agent = create_react_agent(model, tools, prompt=prompt) 
