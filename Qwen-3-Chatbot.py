@@ -1,6 +1,6 @@
 import streamlit as st
 import os
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 from pinecone import Pinecone
 from langchain_huggingface import HuggingFaceEmbeddings, HuggingFaceEndpoint
 from langchain_pinecone import PineconeVectorStore
@@ -9,7 +9,7 @@ from langgraph.prebuilt import create_react_agent
 from langchain_core.messages import HumanMessage, AIMessage
 
 # Load environment variables
-load_dotenv()
+# load_dotenv()
 
 st.set_page_config(page_title="Qwen3 RAG Chatbot", page_icon="🤖")
 st.title("🤖 Qwen3 Agentic RAG Chatbot")
