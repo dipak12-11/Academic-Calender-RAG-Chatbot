@@ -8,7 +8,7 @@ from langchain.tools import tool
 from langgraph.prebuilt import create_react_agent
 from langchain_core.messages import HumanMessage, AIMessage
 
-Load environment variables
+#Load environment variables
 load_dotenv()
 
 st.set_page_config(page_title="Qwen3 RAG Chatbot", page_icon="🤖")
