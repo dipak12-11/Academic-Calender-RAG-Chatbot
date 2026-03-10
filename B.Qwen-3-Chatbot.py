@@ -111,7 +111,7 @@ def init_agent():
         Use the tool to help answer user queries."""
         
         agent = create_react_agent(
-            model=model_with_tools,  # ✅ Use model with bound tools
+            model=model_with_tools,  
             tools=[retrieve_context],
             prompt=system_prompt,
         )
