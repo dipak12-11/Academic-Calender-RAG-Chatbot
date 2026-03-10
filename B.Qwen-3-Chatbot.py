@@ -8,7 +8,6 @@ load_dotenv()
 from langchain.tools import tool
 from langgraph.prebuilt import create_react_agent
 from langchain_core.messages import HumanMessage, AIMessage
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
 
 
@@ -22,6 +21,7 @@ with st.sidebar:
     st.info("Model: Qwen3-14B via Hugging Face")
     st.info("Embedding: all-MiniLM-L6-v2")
     st.info("Vector DB: Pinecone")
+    debug_mode = st.toggle("🐞 Show Tool Calls", value=False)
     if st.button("🗑️ Clear Chat History"):
         st.session_state.messages = []
         st.rerun()
@@ -31,12 +31,23 @@ def init_agent():
     """Initialize the RAG agent with Qwen3 model."""
     try:
         # 1. Initialize Pinecone
-        pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
+        pinecone_api_key = os.getenv("PINECONE_API_KEY")
+        hf_api_token = os.getenv("HUGGINGFACEHUB_API_TOKEN")
         index_name = os.getenv("PINECONE_INDEX_NAME")
+
+        if not pinecone_api_key:
+            st.error("PINECONE_API_KEY not found in environment variables!")
+            return None
+
+        if not hf_api_token:
+            st.error("HUGGINGFACEHUB_API_TOKEN not found in environment variables!")
+            return None
         
         if not index_name:
             st.error("PINECONE_INDEX_NAME not found in environment variables!")
             return None
+
+        pc = Pinecone(api_key=pinecone_api_key)
             
         index = pc.Index(index_name)
         
@@ -46,8 +57,6 @@ def init_agent():
             model_kwargs={"device": "cpu"},
             encode_kwargs={"normalize_embeddings": True}
         )
-        # embedding_model2= GoogleGenerativeAIEmbeddings(model="models/gemini-embedding-001")#dim 3072
-        
         # 3. Initialize Vector Store
         vector_store = PineconeVectorStore(
             index=index,
@@ -60,7 +69,7 @@ def init_agent():
             temperature=0,
             top_p=0.95,
             repetition_penalty=1.1,
-            huggingfacehub_api_token=os.getenv("HUGGINGFACEHUB_API_TOKEN"),
+            huggingfacehub_api_token=hf_api_token,
         )
         
         # 5. Wrap as Chat Model for LangGraph
@@ -159,7 +168,11 @@ if question := st.chat_input("Ask a question about the Academic Calendar..."):
                             last_message = event["messages"][-1]
                             
                             # Show tool calls (optional - for debugging)
-                            if hasattr(last_message, "tool_calls") and last_message.tool_calls:
+                            if (
+                                debug_mode
+                                and hasattr(last_message, "tool_calls")
+                                and last_message.tool_calls
+                            ):
                                 if not tool_calls_shown:
                                     with st.expander("🔧 Tool Calls"):
                                         for tc in last_message.tool_calls:
